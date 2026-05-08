@@ -35,7 +35,7 @@ jobs:
           maps_file="$(mktemp)"
           trap 'rm -f "$maps_file"' EXIT
 
-          find julius -maxdepth 1 -type f -name "*.map" -printf '%f\n' | LC_ALL=C sort > "$maps_file"
+          find julius -maxdepth 1 -type f -name "*.map" | sed 's|.*/||' | LC_ALL=C sort > "$maps_file"
 
           while read -r name; do
             sha=$(sha256sum "julius/$name" | awk '{print $1}')
