@@ -1,11 +1,6 @@
 name: Publish Julius Downloads
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "julius/**"
-      - ".github/workflows/julius-list.yml"
   workflow_dispatch:
 
 permissions:
