@@ -22,4 +22,4 @@ https://c3fan.github.io/c3-maps/julius.list
 https://c3fan.github.io/c3-maps/julius/<文件名>.map
 ```
 
-每次向 `main` 分支推送 `julius/` 目录或 `/home/runner/work/c3-maps/c3-maps/.github/workflows/julius-list.yml` 的变更时，GitHub Actions 会自动重新生成 `julius.list`，打包整个 `julius/` 目录，并发布到 GitHub Pages。
+每次向 `main` 分支推送 `julius/` 目录或 `.github/workflows/julius-list.yml` 的变更时，GitHub Actions 会自动重新生成 `julius.list`，打包整个 `julius/` 目录，并发布到 GitHub Pages。
