@@ -51,10 +51,10 @@ jobs:
           <head>
             <meta charset="utf-8">
             <meta name="viewport" content="width=device-width, initial-scale=1">
-            <title>c3-maps Julius Downloads</title>
+            <title>c3fan Downloads</title>
           </head>
           <body>
-            <h1>c3-maps Julius Downloads</h1>
+            <h1>c3fan Downloads</h1>
             <p><a href="./julius.list">下载 julius.list</a></p>
             <h2>julius/</h2>
             <ul>
