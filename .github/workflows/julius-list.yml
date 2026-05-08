@@ -39,8 +39,8 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          if ! git diff --quiet julius.list 2>/dev/null || ! git ls-files --error-unmatch julius.list 2>/dev/null; then
-            git add julius.list
+          git add julius.list
+          if ! git diff --cached --quiet; then
             git commit -m "chore: update julius.list [skip ci]"
             git push
           fi
