@@ -1,14 +1,15 @@
-name: Publish Julius List
+name: Publish Julius Downloads
 
 on:
   push:
     branches: [main]
     paths:
       - "julius/**"
+      - ".github/workflows/julius-list.yml"
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 
@@ -17,7 +18,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  generate-and-publish:
+  publish-pages:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -26,29 +27,57 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Generate julius.list
+      - name: Build Pages artifact
         run: |
-          cd julius
-          find . -maxdepth 1 -name "*.map" | sort | while read f; do
-            name="${f#./}"
-            sha=$(sha256sum "$f" | awk '{print $1}')
+          set -euo pipefail
+
+          mkdir -p _site/julius
+          maps_file="$(mktemp)"
+          trap 'rm -f "$maps_file"' EXIT
+
+          find julius -maxdepth 1 -type f -name "*.map" | sed 's|.*/||' | LC_ALL=C sort > "$maps_file"
+
+          while read -r name; do
+            sha=$(sha256sum "julius/$name" | awk '{print $1}')
             echo "$name $sha"
-          done > ../julius.list
+          done < "$maps_file" > _site/julius.list
 
-      - name: Commit julius.list if changed
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add julius.list
-          if ! git diff --cached --quiet; then
-            git commit -m "chore: update julius.list [skip ci]"
-            git push
-          fi
+          cp -a julius/. _site/julius/
+          touch _site/.nojekyll
 
-      - name: Prepare Pages artifact
+          cat <<'EOF' > _site/index.html
+          <!doctype html>
+          <html lang="zh-CN">
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <title>c3-maps Julius Downloads</title>
+          </head>
+          <body>
+            <h1>c3-maps Julius Downloads</h1>
+            <p><a href="./julius.list">下载 julius.list</a></p>
+            <h2>julius/</h2>
+            <ul>
+          EOF
+
+          while read -r name; do
+            printf '      <li><a href="./julius/%s">%s</a></li>\n' "$name" "$name" >> _site/index.html
+          done < "$maps_file"
+
+          cat <<'EOF' >> _site/index.html
+            </ul>
+          </body>
+          </html>
+          EOF
+
+      - name: Validate Pages artifact
         run: |
-          mkdir -p _site
-          cp julius.list _site/julius.list
+          set -euo pipefail
+
+          test -s _site/julius.list
+          test -f _site/index.html
+          test -d _site/julius
+          find _site/julius -maxdepth 1 -type f -name "*.map" | grep -q .
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
