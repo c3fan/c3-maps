@@ -32,11 +32,15 @@ jobs:
           set -euo pipefail
 
           mkdir -p _site/julius
+          maps_file="$(mktemp)"
+          trap 'rm -f "$maps_file"' EXIT
 
-          find julius -maxdepth 1 -type f -name "*.map" -printf '%f\n' | LC_ALL=C sort | while read -r name; do
+          find julius -maxdepth 1 -type f -name "*.map" -printf '%f\n' | LC_ALL=C sort > "$maps_file"
+
+          while read -r name; do
             sha=$(sha256sum "julius/$name" | awk '{print $1}')
             echo "$name $sha"
-          done > _site/julius.list
+          done < "$maps_file" > _site/julius.list
 
           cp -a julius/. _site/julius/
           touch _site/.nojekyll
@@ -56,9 +60,9 @@ jobs:
             <ul>
           EOF
 
-          find julius -maxdepth 1 -type f -name "*.map" -printf '%f\n' | LC_ALL=C sort | while read -r name; do
+          while read -r name; do
             printf '      <li><a href="./julius/%s">%s</a></li>\n' "$name" "$name" >> _site/index.html
-          done
+          done < "$maps_file"
 
           cat <<'EOF' >> _site/index.html
             </ul>
